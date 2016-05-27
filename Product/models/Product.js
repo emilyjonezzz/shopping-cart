@@ -11,26 +11,6 @@ const ProductSchema = new mongoose.Schema({
   }
 });
 
-ProductSchema.statics = {
-  list({ limit = 20 } = {}) {
-    return this.find()
-            // .sort({ createdAt: -1})
-            .limit(limit)
-            .exec();
-  },
-  get(id) {
-    return this.findById(id)
-                .execAsync()
-                .then((products) => {
-                  if (products) {
-                    return products;
-                  }
-
-                  Promise.reject('No product by that ID!');
-                })
-  }
-};
-
 const Product = mongoose.model('Product', ProductSchema);
 
 export default Product;
