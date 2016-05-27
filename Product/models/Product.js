@@ -14,7 +14,7 @@ const ProductSchema = new mongoose.Schema({
 ProductSchema.statics = {
   list({ limit = 20 } = {}) {
     return this.find()
-            .sort({ createdAt: -1})
+            // .sort({ createdAt: -1})
             .limit(limit)
             .exec();
   },
