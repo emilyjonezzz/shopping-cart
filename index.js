@@ -1,8 +1,11 @@
 import express from 'express';
+import Promise from 'bluebird';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 import app from './config/server';
 import config from './config/env';
+
+Promise.promisifyAll(mongoose);
 
 mongoose.connect('mongodb://root:root@ds015953.mlab.com:15953/shopping-cart');
 mongoose.connection.on('error', () => {

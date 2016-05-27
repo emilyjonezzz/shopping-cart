@@ -1,11 +1,24 @@
 import mongoose from 'mongoose';
 
-const schema = new mongoose.Schema({
+const ProductSchema = new mongoose.Schema({
   name: String,
   color: String,
-  price: Number
+  price: Number,
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
 });
 
-const Product = mongoose.model('Product', schema);
+ProductSchema.statics = {
+  list({ limit = 20 } = {}) {
+    return this.find()
+            .sort({ createdAt: -1})
+            .limit(limit)
+            .exec();
+  }
+};
+
+const Product = mongoose.model('Product', ProductSchema);
 
 export default Product;

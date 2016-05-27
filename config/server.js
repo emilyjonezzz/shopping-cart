@@ -9,6 +9,11 @@ const port = process.env.PORT || 8080;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+// Default route
+app.get('/', function (req, res) {
+  res.send('Welcome to shopping-cart API');
+});
+
 app.use('/api', allRoutes);
 
 export default app;
