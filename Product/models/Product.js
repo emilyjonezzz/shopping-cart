@@ -1,3 +1,4 @@
+import Promise from 'bluebird';
 import mongoose from 'mongoose';
 
 const ProductSchema = new mongoose.Schema({
@@ -16,6 +17,17 @@ ProductSchema.statics = {
             .sort({ createdAt: -1})
             .limit(limit)
             .exec();
+  },
+  get(id) {
+    return this.findById(id)
+                .execAsync()
+                .then((products) => {
+                  if (products) {
+                    return products;
+                  }
+
+                  Promise.reject('No product by that ID!');
+                })
   }
 };
 

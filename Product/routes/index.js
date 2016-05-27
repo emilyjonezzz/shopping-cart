@@ -6,5 +6,6 @@ const productRouter = express.Router();
 
 productRouter.get('/generate', productCtrl.generate);
 productRouter.post('/create', productCtrl.create);
+productRouter.delete('/delete/:id', productCtrl.remove);
 
 export default productRouter;
