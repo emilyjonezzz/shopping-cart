@@ -6,4 +6,4 @@ const defaults = {
   root: path.join(__dirname, '/..')
 };
 
-export default Object.assign({}, config, defaults);
+export default Object.assign(config, defaults);
