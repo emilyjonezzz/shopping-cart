@@ -1,8 +1,9 @@
 import express from 'express';
 import faker from 'faker';
-import productCtrl from '../controllers/Product';
+import ProductController from './ProductController';
 
 const productRouter = express.Router();
+const productCtrl = new ProductController();
 
 productRouter.get('/', productCtrl.lists);
 productRouter.get('/generate', productCtrl.generate);

@@ -1,5 +1,5 @@
 import express from 'express';
-import productRoutes from '../Product/routes';
+import productRoutes from '../server/Product/ProductRoutes';
 
 const router = express.Router();
 
