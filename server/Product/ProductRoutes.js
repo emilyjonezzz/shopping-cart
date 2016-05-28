@@ -1,5 +1,4 @@
 import express from 'express';
-import faker from 'faker';
 import ProductController from './ProductController';
 
 const productRouter = express.Router();

@@ -7,8 +7,8 @@ const ProductSchema = new mongoose.Schema({
   qty: Number,
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 const Product = mongoose.model('Product', ProductSchema);

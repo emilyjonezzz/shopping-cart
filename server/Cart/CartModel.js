@@ -5,11 +5,11 @@ const CartSchema = new mongoose.Schema({
   created_at: Date,
   updated_at: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   totalQty: Number,
   totalPrice: Number,
-  products: []
+  products: [],
 });
 
 const Cart = mongoose.model('Cart', CartSchema);
