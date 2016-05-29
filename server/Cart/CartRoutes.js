@@ -8,6 +8,10 @@ const cartCtrl = new CartController(userId);
 cartRouter.get('/', (req, res) => {
   cartCtrl.getCart(req, res);
 });
+
+cartRouter.post('/add/:itemId', (req, res, next) => {
+  cartCtrl.addToCart(req, res, next);
+});
 // cartRouter.get('/generate', cartCtrl.generate);
 // cartRouter.post('/create', cartCtrl.create);
 // cartRouter.delete('/delete/:id', cartCtrl.remove);
