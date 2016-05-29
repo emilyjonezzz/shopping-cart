@@ -2,6 +2,12 @@ import Product from './ProductModel';
 import faker from 'faker';
 
 export default class ProductController {
+  /**
+   * Generate 10 products using faker >:)
+   * @param  {[type]} req [description]
+   * @param  {[type]} res [description]
+   * @return {[type]}     [description]
+   */
   generate(req, res) {
     const product = new Product();
     const products = [];
@@ -23,6 +29,13 @@ export default class ProductController {
     });
   }
 
+  /**
+   * Create a single product.
+   * @param  {[type]}   req  [description]
+   * @param  {[type]}   res  [description]
+   * @param  {Function} next [description]
+   * @return {[type]}        [description]
+   */
   create(req, res, next) {
     const product = new Product({
       name: req.body.name,
@@ -36,6 +49,12 @@ export default class ProductController {
             .error((err) => next(err));
   }
 
+  /**
+   * Remove a product.
+   * @param  {[type]} req [description]
+   * @param  {[type]} res [description]
+   * @return {[type]}     [description]
+   */
   remove(req, res) {
     Product.findByIdAndRemove(req.params.id, (err) => {
       if (err) {
@@ -53,6 +72,13 @@ export default class ProductController {
     });
   }
 
+  /**
+   * Get a product.
+   * @param  {[type]}   req  [description]
+   * @param  {[type]}   res  [description]
+   * @param  {Function} next [description]
+   * @return {[type]}        [description]
+   */
   getProduct(req, res, next) {
     Product.findById(req.params.id, (err, product) => {
       if (err) {

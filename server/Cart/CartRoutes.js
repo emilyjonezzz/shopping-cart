@@ -12,9 +12,9 @@ cartRouter.get('/', (req, res) => {
 cartRouter.post('/add/:itemId', (req, res, next) => {
   cartCtrl.addToCart(req, res, next);
 });
-// cartRouter.get('/generate', cartCtrl.generate);
-// cartRouter.post('/create', cartCtrl.create);
-// cartRouter.delete('/delete/:id', cartCtrl.remove);
-// cartRouter.get('/:id', cartCtrl.getProduct);
+
+cartRouter.delete('/delete/:itemId', (req, res) => {
+  cartCtrl.removeFromCart(req, res);
+});
 
 export default cartRouter;

@@ -7,6 +7,11 @@ export default class CartController {
     this.userId = userId;
   }
 
+  /**
+   * Create cart for the current user.
+   * @param  {[type]} userId [description]
+   * @return {[type]}        [description]
+   */
   createCart(userId) {
     const Cart = new CartModel({
       user_id: userId,
@@ -21,6 +26,13 @@ export default class CartController {
     return Cart;
   }
 
+  /**
+   * Get cart data. It will create a cart automatically,
+   * if the current user didn't have cart yet.
+   * @param  {[type]} req [description]
+   * @param  {[type]} res [description]
+   * @return {[type]}     [description]
+   */
   getCart(req, res) {
     CartModel
       .find({ user_id: this.userId })
@@ -41,6 +53,11 @@ export default class CartController {
       });
   }
 
+  /**
+   * Add an item to cart
+   * @param {[type]} req [description]
+   * @param {[type]} res [description]
+   */
   addToCart(req, res) {
     const product = ProductModel;
     const cart = CartModel;
@@ -74,6 +91,7 @@ export default class CartController {
           },
           { strict: false },
           (insertProductErr, insertProductRaw) => {
+            // If there's no qty remaining for the current product
             if (parseInt(insertProductRaw.nModified, 10) === 0) {
               // Remove the currently added product
               cart.update({ user_id: this.userId },
@@ -120,5 +138,77 @@ export default class CartController {
         );
       }
     });
+  }
+
+  /**
+   * Remove an item from cart.
+   * @param  {[type]} req [description]
+   * @param  {[type]} res [description]
+   * @return {[type]}     [description]
+   */
+  removeFromCart(req, res) {
+    const cart = CartModel;
+
+    // Remove specific product from cart
+    cart.update({ user_id: this.userId },
+      {
+        $pull: {
+          products: { productId: req.params.itemId },
+        },
+      }
+    )
+    .then((resUpdate) => {
+      if (!resUpdate.ok) {
+        res.json(
+          { status: 500, message: 'Something wrong while deleting your item' }
+        );
+      }
+
+      this.sumTotalPriceAndQty()
+          .then((total) => this.updateTotalPriceAndQty(total))
+          .then((resUpdateTotal) => {
+            if (!resUpdateTotal.ok) {
+              res.json({ status: 500, message: 'Something wrong while updating your cart' });
+            }
+
+            res.json({ status: 200, message: 'Your item has been successfully deleted' });
+          });
+    });
+  }
+
+  /**
+   * Sum total price and qty for current cart
+   * @return {[type]} [description]
+   */
+  sumTotalPriceAndQty() {
+    return CartModel.aggregate()
+                    .unwind('products')
+                    .group({
+                      _id: '',
+                      totalQty: { $sum: '$products.qty' },
+                      totalPrice: { $sum: '$products.price' },
+                    })
+                    .project({
+                      totalQty: 1,
+                      totalPrice: 1,
+                    })
+                    .execAsync();
+  }
+
+  /**
+   * Update total price and qty on cart collection.
+   * @param  {[type]} total [description]
+   * @return {[type]}       [description]
+   */
+  updateTotalPriceAndQty(total) {
+    return CartModel.update({ user_id: this.userId },
+      {
+        $set: {
+          updated_at: new Date,
+          totalPrice: total[0].totalPrice,
+          totalQty: total[0].totalQty,
+        },
+      }
+    );
   }
 }
