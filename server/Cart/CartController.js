@@ -77,14 +77,17 @@ export default class CartController {
       // If successfully created a cart
       // or this user already have a cart
       if (createdCart || results.cart.length) {
+        const id = results.cart[0]._id || createdCart[0]._id; //eslint-disable-line
+
         // Update product quantity and add cart id to it
         product.update({ _id: req.params.itemId, qty: { $gte: 1 } },
           {
             $inc: { qty: -1 },
             $push: {
               in_carts: {
+                cart_id: id,
                 qty: 1,
-                _id: this.userId,
+                user_id: this.userId,
                 created_at: new Date(),
               },
             },
@@ -147,16 +150,11 @@ export default class CartController {
    * @return {[type]}     [description]
    */
   removeFromCart(req, res) {
-    const cart = CartModel;
+    const itemId = req.params.itemId;
+    const totalQtyBefore = this.getTotalQtyBeforeUpdate(itemId);
 
     // Remove specific product from cart
-    cart.update({ user_id: this.userId },
-      {
-        $pull: {
-          products: { productId: req.params.itemId },
-        },
-      }
-    )
+    this.pullProducts(itemId)
     .then((resUpdate) => {
       if (!resUpdate.ok) {
         res.json(
@@ -165,15 +163,64 @@ export default class CartController {
       }
 
       this.sumTotalPriceAndQty()
-          .then((total) => this.updateTotalPriceAndQty(total))
-          .then((resUpdateTotal) => {
-            if (!resUpdateTotal.ok) {
-              res.json({ status: 500, message: 'Something wrong while updating your cart' });
-            }
+          .then((total) => {
+            this.updateTotalPriceAndQty(total)
+                .then((resUpdateTotal) => {
+                  if (!resUpdateTotal.ok) {
+                    res.json({ status: 500, message: 'Something wrong while updating your cart' });
+                  }
+                });
+          })
+          .then(() => {
+            totalQtyBefore.then((qty) => {
+              if (qty.length > 0) {
+                ProductModel.update({ _id: itemId },
+                  {
+                    $set: {
+                      updated_at: new Date(),
+                      qty: { $inc: qty[0].totalQty },
+                    },
+                  }
+                ).then(() => {});
+              }
+            });
 
             res.json({ status: 200, message: 'Your item has been successfully deleted' });
           });
     });
+  }
+
+  /**
+   * Pull / delete product from cart array.
+   * @param  {[type]} itemId [description]
+   * @return {[type]}        [description]
+   */
+  pullProducts(itemId) {
+    return CartModel.update({ user_id: this.userId },
+      {
+        $pull: {
+          products: { productId: itemId },
+        },
+      }
+    );
+  }
+
+  /**
+   * Get total qty from cart before update operation.
+   * @param  {[type]} itemId [description]
+   * @return {[type]}        [description]
+   */
+  getTotalQtyBeforeUpdate(itemId) {
+    return CartModel.aggregate()
+                    .unwind('products')
+                    .match({
+                      'products.productId': itemId,
+                    })
+                    .group({
+                      _id: '',
+                      totalQty: { $sum: '$products.qty' },
+                    })
+                    .execAsync();
   }
 
   /**
@@ -203,12 +250,11 @@ export default class CartController {
   updateTotalPriceAndQty(total) {
     return CartModel.update({ user_id: this.userId },
       {
-        $set: {
-          updated_at: new Date,
-          totalPrice: total[0].totalPrice,
-          totalQty: total[0].totalQty,
-        },
-      }
+        updated_at: new Date,
+        totalPrice: total.length > 0 ? total[0].totalPrice : 0,
+        totalQty: total.length > 0 ? total[0].totalQty : 0,
+      },
+      { strict: false }
     );
   }
 }
