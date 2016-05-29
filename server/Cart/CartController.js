@@ -151,41 +151,47 @@ export default class CartController {
    */
   removeFromCart(req, res) {
     const itemId = req.params.itemId;
-    const totalQtyBefore = this.getTotalQtyBeforeUpdate(itemId);
 
-    // Remove specific product from cart
-    this.pullProducts(itemId)
-    .then((resUpdate) => {
-      if (!resUpdate.ok) {
-        res.json(
-          { status: 500, message: 'Something wrong while deleting your item' }
-        );
-      }
+    this.getTotalQtyBeforeUpdate(itemId).then((qty) => {
+      // Remove specific product from cart
+      this.pullProducts(itemId)
+          .then((resUpdate) => {
+            if (!resUpdate.ok) {
+              res.json({
+                status: 500,
+                message: 'Something wrong while deleting your item',
+              });
+            }
 
-      this.sumTotalPriceAndQty()
-          .then((total) => {
-            this.updateTotalPriceAndQty(total)
-                .then((resUpdateTotal) => {
-                  if (!resUpdateTotal.ok) {
-                    res.json({ status: 500, message: 'Something wrong while updating your cart' });
+            this.sumTotalPriceAndQty()
+                .then((total) => {
+                  this.updateTotalPriceAndQty(total)
+                      .then((resUpdateTotal) => {
+                        if (!resUpdateTotal.ok) {
+                          res.json({
+                            status: 500,
+                            message: 'Something wrong while updating your cart',
+                          });
+                        }
+                      });
+                })
+                .then(() => {
+                  if (qty.length > 0) {
+                    ProductModel.update({ _id: itemId },
+                      {
+                        $inc: { qty: Number(qty[0].totalQty) },
+                        $set: {
+                          updated_at: new Date(),
+                        },
+                      }
+                    ).then(() => {});
                   }
+
+                  res.json({
+                    status: 200,
+                    message: 'Your item has been successfully deleted',
+                  });
                 });
-          })
-          .then(() => {
-            totalQtyBefore.then((qty) => {
-              if (qty.length > 0) {
-                ProductModel.update({ _id: itemId },
-                  {
-                    $set: {
-                      updated_at: new Date(),
-                      qty: { $inc: qty[0].totalQty },
-                    },
-                  }
-                ).then(() => {});
-              }
-            });
-
-            res.json({ status: 200, message: 'Your item has been successfully deleted' });
           });
     });
   }
