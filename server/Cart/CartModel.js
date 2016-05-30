@@ -10,6 +10,11 @@ const CartSchema = new mongoose.Schema({
   totalQty: Number,
   totalPrice: Number,
   products: [],
+  coupon: [{
+    name: String,
+    price: Number,
+    code: String,
+  }],
 });
 
 const Cart = mongoose.model('Cart', CartSchema);

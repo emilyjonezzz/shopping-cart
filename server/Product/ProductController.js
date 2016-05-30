@@ -9,8 +9,6 @@ export default class ProductController {
    * @return {[type]}     [description]
    */
   generate(req, res) {
-    if (req.method === 'GET') res.status(400).send('Wrong HTTP method');
-
     const product = new Product();
     const products = [];
 
@@ -58,11 +56,16 @@ export default class ProductController {
    * @return {[type]}     [description]
    */
   remove(req, res) {
-    Product.findByIdAndRemove(req.params.id, (err) => {
+    if (req.params.productId === undefined) {
+      res.status(400).send('Missing id');
+      return;
+    }
+
+    Product.findByIdAndRemove(req.params.productId, (err) => {
       if (err) {
         res.send(err);
       } else {
-        res.json(req.params.id);
+        res.json(req.params.productId);
       }
     });
   }
@@ -82,11 +85,14 @@ export default class ProductController {
    * @return {[type]}        [description]
    */
   getProduct(req, res) {
-    if (req.params.id === 'generate' || req.params.id === '') res.status(400).send('Missing id');
+    if (req.params.productId === undefined) {
+      res.status(400).send('Missing id');
+      return;
+    }
 
-    Product.findById(req.params.id, (err, product) => {
+    Product.findById(req.params.productId, (err, product) => {
       if (err) {
-        throw new Error(err);
+        res.send(new Error(err));
       }
 
       res.json(product);

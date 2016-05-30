@@ -1,6 +1,7 @@
 import Promise from 'bluebird';
 import CartModel from './CartModel';
 import ProductModel from '../Product/ProductModel';
+import CouponModel from '../Coupon/CouponModel';
 
 export default class CartController {
   constructor(userId) {
@@ -51,6 +52,29 @@ export default class CartController {
       .error((err) => {
         res.json({ status: 500, message: err });
       });
+  }
+
+  getCartAsync() {
+    return CartModel.find({ user_id: this.userId }).execAsync();
+  }
+
+  /**
+   * Clear user cart.
+   * @param  {[type]} req [description]
+   * @param  {[type]} res [description]
+   * @return {[type]}     [description]
+   */
+  clearCart(req, res) {
+    CartModel.update({ user_id: this.userId },
+      {
+        $set: { products: [], totalQty: 0, totalPrice: 0 },
+      },
+      (err, affected) => {
+        if (err) res.status(500).send('Critical error');
+
+        res.json({ status: 200, message: affected });
+      }
+    );
   }
 
   /**
@@ -108,7 +132,7 @@ export default class CartController {
                 },
                 {},
                 () => {
-                  res.json({ status: 200, message: `Sorry! ${results.product.name} is empty` });
+                  res.json({ status: 200, message: 'Sorry! This product is empty' });
                 }
               );
             } else {
@@ -263,4 +287,64 @@ export default class CartController {
       { strict: false }
     );
   }
+
+  /**
+   * Apply coupon to a cart using coupon code.
+   * @param  {[type]} req [description]
+   * @param  {[type]} res [description]
+   * @return {[type]}     [description]
+   */
+  applyCoupon(req, res) {
+    this.getCartAsync()
+        .then((cartData) => {
+          if (cartData[0].products.length > 0) {
+            this.getCouponData(req.params.code)
+                .then((couponData) => {
+                  if (couponData.length === 0) {
+                    res.status(400).send('No such coupon code!');
+                    return;
+                  }
+
+                  CartModel.update({ user_id: this.userId },
+                    {
+                      $set: {
+                        totalPrice: this.calculateTotalAfterApplyCoupon(cartData[0].totalPrice, couponData[0].price), //eslint-disable-line
+                        updated_at: new Date(),
+                        coupon: [{
+                          name: couponData[0].name,
+                          price: couponData[0].price,
+                          code: req.params.code,
+                        }],
+                      },
+                    },
+                    {},
+                    (response) => {
+                      res.json({ status: 200, message: response });
+                    }
+                  );
+                });
+          }
+        });
+  }
+
+  /**
+   * Get coupon data by coupon code.
+   * @param  {[type]} couponCode [description]
+   * @return {[type]}            [description]
+   */
+  getCouponData(couponCode) {
+    return CouponModel.find({ code: couponCode })
+                      .execAsync();
+  }
+
+  /**
+   * Calculate cart total price after applied coupon.
+   * @param  {[type]} totalPrice  [description]
+   * @param  {[type]} couponPrice [description]
+   * @return {[type]}             [description]
+   */
+  calculateTotalAfterApplyCoupon(totalPrice, couponPrice) {
+    return parseFloat(totalPrice) - parseFloat(couponPrice);
+  }
+
 }

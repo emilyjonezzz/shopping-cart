@@ -25,7 +25,7 @@ describe('Connection', function () {
   describe('Product routes', function () {
     it('should show all product lists', function (done) {
       request(app)
-      .get('/api/product')
+      .get('/api/product/list')
       .expect(200)
       .expect('Content-Type', 'application/json; charset=utf-8')
       .end(function (err, res) {
@@ -35,10 +35,24 @@ describe('Connection', function () {
       });
     });
 
-    it('should not allowed to see the product generate page', function (done) {
+    it('should generate product', function (done) {
       request(app)
-      .get('/api/product/generate')
-      .expect(400, done);
+      .post('/api/product/generate')
+      .expect(200, done);
+    });
+
+    it('get product should return error if missing id', function (done) {
+      request(app)
+      .get('/api/product/get')
+      .expect(400)
+      .expect('Missing id', done);
+    });
+
+    it('delete product should return error if missing id', function (done) {
+      request(app)
+      .delete('/api/product/delete')
+      .expect(400)
+      .expect('Missing id', done);
     });
   });
 });
