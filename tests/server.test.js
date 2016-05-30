@@ -55,4 +55,58 @@ describe('Connection', function () {
       .expect('Missing id', done);
     });
   });
+
+  describe('Cart routes', function (done) {
+    it('should show cart data', function (done) {
+      request(app)
+      .get('/api/cart/list')
+      .expect(200)
+      .expect('Content-Type', 'application/json; charset=utf-8', done);
+    });
+
+    it('should return error if missing coupon code', function (done) {
+      request(app)
+      .post('/api/cart/applyCoupon')
+      .expect(400)
+      .expect('Missing coupon code', done);
+    });
+
+    it('add product to cart should return error if missing item id', function (done) {
+      request(app)
+      .post('/api/cart/add')
+      .expect(400)
+      .expect('Missing id', done);
+    });
+
+    it('remove product from cart should return error if missing item id', function (done) {
+      request(app)
+      .delete('/api/cart/delete')
+      .expect(400)
+      .expect('Missing id', done);
+    });
+  });
+
+  describe('Coupon routes', function (done) {
+    it('should show all coupon data', function (done) {
+      request(app)
+      .get('/api/coupon/list')
+      .expect(200)
+      .expect('Content-Type', 'application/json; charset=utf-8', done);
+    });
+
+    it('delete should return error if missing coupon id', function (done) {
+      request(app)
+      .delete('/api/coupon/delete')
+      .expect(400)
+      .expect('Missing coupon id', done);
+    });
+
+    it('get should return error if missing coupon id', function (done) {
+      request(app)
+      .get('/api/coupon/get')
+      .expect(400)
+      .expect('Missing coupon id', done);
+    });
+  });
+
 });

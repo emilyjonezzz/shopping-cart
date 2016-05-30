@@ -83,6 +83,11 @@ export default class CartController {
    * @param {[type]} res [description]
    */
   addToCart(req, res) {
+    if (req.params.itemId === undefined) {
+      res.status(400).send('Missing id');
+      return;
+    }
+
     const product = ProductModel;
     const cart = CartModel;
 
@@ -174,6 +179,11 @@ export default class CartController {
    * @return {[type]}     [description]
    */
   removeFromCart(req, res) {
+    if (req.params.itemId === undefined) {
+      res.status(400).send('Missing id');
+      return;
+    }
+
     const itemId = req.params.itemId;
 
     this.getTotalQtyBeforeUpdate(itemId).then((qty) => {
@@ -295,6 +305,11 @@ export default class CartController {
    * @return {[type]}     [description]
    */
   applyCoupon(req, res) {
+    if (req.params.code === undefined) {
+      res.status(400).send('Missing coupon code');
+      return;
+    }
+
     this.getCartAsync()
         .then((cartData) => {
           if (cartData[0].products.length > 0) {
@@ -318,7 +333,7 @@ export default class CartController {
                       },
                     },
                     {},
-                    (response) => {
+                    (err, response) => {
                       res.json({ status: 200, message: response });
                     }
                   );
@@ -344,7 +359,8 @@ export default class CartController {
    * @return {[type]}             [description]
    */
   calculateTotalAfterApplyCoupon(totalPrice, couponPrice) {
-    return parseFloat(totalPrice) - parseFloat(couponPrice);
+    const total = parseFloat(totalPrice) - parseFloat(couponPrice);
+    return (total < 0) ? 0 : total;
   }
 
 }
