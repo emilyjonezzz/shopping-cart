@@ -1,4 +1,4 @@
-# Shopping cart with Express and React
+# Shopping cart with Express and React (not implemented yet!)
 
 Available REST API routes:
   * Product:
