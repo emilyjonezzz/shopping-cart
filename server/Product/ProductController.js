@@ -9,6 +9,8 @@ export default class ProductController {
    * @return {[type]}     [description]
    */
   generate(req, res) {
+    if (req.method === 'GET') res.status(400).send('Wrong HTTP method');
+
     const product = new Product();
     const products = [];
 
@@ -23,7 +25,7 @@ export default class ProductController {
     }
 
     product.collection.insert(products, (err, raw) => {
-      if (err) res.send(err.stack);
+      if (err) res.status(400).send(err.stack);
 
       res.json({ status: 200, message: raw.ops });
     });
@@ -65,9 +67,9 @@ export default class ProductController {
     });
   }
 
-  lists(req, res, next) {
+  lists(req, res) {
     Product.find({}, (err, products) => {
-      if (err) next(err);
+      if (err) res.send(err);
       res.send(products);
     });
   }
@@ -79,13 +81,15 @@ export default class ProductController {
    * @param  {Function} next [description]
    * @return {[type]}        [description]
    */
-  getProduct(req, res, next) {
+  getProduct(req, res) {
+    if (req.params.id === 'generate' || req.params.id === '') res.status(400).send('Missing id');
+
     Product.findById(req.params.id, (err, product) => {
       if (err) {
-        next(err);
-      } else {
-        res.json(product);
+        throw new Error(err);
       }
+
+      res.json(product);
     });
   }
 }
