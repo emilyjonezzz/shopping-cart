@@ -22,10 +22,10 @@ export default class ProductController {
       });
     }
 
-    product.collection.insert(products, (err) => {
+    product.collection.insert(products, (err, raw) => {
       if (err) res.send(err.stack);
 
-      res.json(products);
+      res.json({ status: 200, message: raw.ops });
     });
   }
 

@@ -4,9 +4,9 @@
   "description": "Reyhan's SS Assessment",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "./node_modules/.bin/mocha tests/** --compilers js:babel-core/register --timeout 15000",
     "start": "./node_modules/.bin/babel-node index.js --presets es2015,stage-2",
-    "dev": "node-inspector & nodemon --debug index.js --exec babel-node --presets es2015,stage-2"
+    "dev": "node-inspector & nodemon index.js --exec ./node_modules/.bin/babel-node"
   },
   "author": "Reyhan Sofian",
   "license": "ISC",
@@ -31,6 +31,10 @@
     "eslint-plugin-import": "^1.8.1",
     "eslint-plugin-jsx-a11y": "^1.2.2",
     "eslint-plugin-react": "^5.1.1",
-    "nodemon": "^1.9.2"
+    "mocha": "^2.5.3",
+    "mocha-mongoose": "^1.2.0",
+    "nodemon": "^1.9.2",
+    "should": "^8.4.0",
+    "supertest": "^1.2.0"
   }
 }

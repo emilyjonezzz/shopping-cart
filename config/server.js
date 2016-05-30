@@ -9,9 +9,10 @@ app.use(bodyParser.json());
 
 // Default route
 app.get('/', (req, res) => {
-  res.send('Welcome to shopping-cart API');
+  res.status(200).send('Welcome to shopping-cart API');
 });
 
 app.use('/api', allRoutes);
+app.use('/client', express.static(`${__dirname}/../client`));
 
 export default app;
