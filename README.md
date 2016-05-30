@@ -1,5 +1,10 @@
 # Shopping cart with Express and React (not implemented yet!)
 
+How to use:
+  * Run `npm install` to install all dependencies
+  * Run `npm run dev` to start the development server
+  * Run `npm run test` to start the test
+
 Available REST API routes:
   * Product:
     - **GET** ***/product/list*** to get all items
